@@ -1,4 +1,4 @@
-package campusbackend.auth;
+package campusbackend.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

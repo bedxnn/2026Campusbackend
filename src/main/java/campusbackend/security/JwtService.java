@@ -1,4 +1,4 @@
-package campusbackend.auth;
+package campusbackend.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
