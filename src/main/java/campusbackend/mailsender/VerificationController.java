@@ -21,7 +21,7 @@ public class VerificationController {
         verificationService.sendCode(email);
         return ResponseEntity.ok("code sent");
     }
-    @PostMapping("verify-code")
+    @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestParam String email, @RequestParam String code){
         try{
             verificationService.verifyCode(email, code);
