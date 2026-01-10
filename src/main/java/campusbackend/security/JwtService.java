@@ -46,8 +46,14 @@ public class JwtService {
 
     public boolean isTokenValid(String token) {
         try {
-            extractEmail(token);
-            return true;
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            return claims.getExpiration().after(new Date());
+
         } catch (Exception e) {
             return false;
         }

@@ -1,19 +1,22 @@
 package campusbackend.auth;
 
-import org.apache.catalina.User;
+import campusbackend.mailsender.VerificationService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsersService {
     private final UserServiceRepository userServiceRepository;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationService verificationService;
 
-    public UsersService(UserServiceRepository userServiceRepository,PasswordEncoder passwordEncoder){
+    public UsersService(UserServiceRepository userServiceRepository,PasswordEncoder passwordEncoder,VerificationService verificationService){
         this.userServiceRepository=userServiceRepository;
         this.passwordEncoder=passwordEncoder;
+        this.verificationService=verificationService;
     }
-
+@Transactional
     public void signup(String email,String password){
        String hashedPassword = passwordEncoder.encode(password);
         if (userServiceRepository.existsByEmail(email)) {
@@ -26,7 +29,9 @@ public class UsersService {
         user.setEmail(email);
         user.setPassword(hashedPassword);
         user.setEnabled(false);
+
         userServiceRepository.save(user);
+        verificationService.sendCode(email);
     }
 
     public void login(String email,String password){
