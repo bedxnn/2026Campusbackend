@@ -2,11 +2,14 @@ package campusbackend.mailsender;
 
 import campusbackend.auth.UserServiceRepository;
 import campusbackend.auth.Users;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 @Service
 public class VerificationService {
@@ -14,11 +17,15 @@ public class VerificationService {
     private final EmailVerificationRepository repo;
     private final SecureRandom random = new SecureRandom();
     private final UserServiceRepository userServiceRepository;
+    private final VerificationRepository verificationRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public VerificationService(EmailService emailService, EmailVerificationRepository repo,UserServiceRepository userServiceRepository){
+    public VerificationService(EmailService emailService, EmailVerificationRepository repo,UserServiceRepository userServiceRepository,VerificationRepository verificationRepository,PasswordEncoder passwordEncoder){
         this.emailService=emailService ;
         this.repo = repo;
+        this.passwordEncoder=passwordEncoder;
         this.userServiceRepository=userServiceRepository;
+        this.verificationRepository=verificationRepository;
     }
     public void sendCode(String email){
         String code = String.format("%06d", random.nextInt(1_000_000));
@@ -57,6 +64,31 @@ public class VerificationService {
 
 
         return true;
+    }
+    public String generateResetToken(String email){
+        Users user = userServiceRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("user not found"));
+
+        String token = UUID.randomUUID().toString();
+
+        Verification resetToken = new Verification();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpiryDate(LocalDateTime.now().plusHours(1));
+        verificationRepository.save(resetToken);
+        return token;
+    }
+    public void resetPassword(String token,String newPassword){
+        Verification verification = verificationRepository.findByToken(token).orElseThrow();
+        if( verification.isExpired()){
+            throw new RuntimeException("Token is expired");
+
+        }
+
+        Users user = verification.getUser();
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(hashedPassword);
+         userServiceRepository.save(user);
+
     }
 
 }

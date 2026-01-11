@@ -28,9 +28,11 @@ public class UsersService {
         Users user = new Users();
         user.setEmail(email);
         user.setPassword(hashedPassword);
-        user.setEnabled(false);
 
-        userServiceRepository.save(user);
+     user.setEnabled(true);
+
+
+    userServiceRepository.save(user);
         verificationService.sendCode(email);
     }
 

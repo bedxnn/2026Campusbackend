@@ -1,10 +1,13 @@
 package campusbackend.mailsender;
 
+import campusbackend.dto.ResetPasswordRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class VerificationController {
@@ -32,5 +35,11 @@ public class VerificationController {
                     .body("bad input");
 
         }
+
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest){
+        verificationService.resetPassword(resetPasswordRequest.getNewPassword(),resetPasswordRequest.getToken());
+        return  ResponseEntity.ok("Password reset succesfully");
     }
 }
