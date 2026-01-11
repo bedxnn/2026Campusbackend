@@ -1,6 +1,8 @@
 package campusbackend.mailsender;
 
+import campusbackend.dto.ForgotPasswordRequest;
 import campusbackend.dto.ResetPasswordRequest;
+import campusbackend.ratelimit.RateLimitService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,10 +15,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class VerificationController {
 
     private final VerificationService verificationService;
+    private final RateLimitService rateLimitService;
 
 
-    public VerificationController(VerificationService verificationService){
+    public VerificationController(VerificationService verificationService,RateLimitService rateLimitService){
         this.verificationService = verificationService;
+        this.rateLimitService=rateLimitService;
     }
 
     @PostMapping("/send-code")
@@ -42,4 +46,15 @@ public class VerificationController {
         verificationService.resetPassword(resetPasswordRequest.getNewPassword(),resetPasswordRequest.getToken());
         return  ResponseEntity.ok("Password reset succesfully");
     }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+
+        if (!rateLimitService.allowRequest(request.getEmail())) {
+            return ResponseEntity.status(429).body("Too many requests. Try again later.");
+        }
+        String token = verificationService.generateResetToken(request.getEmail());
+        verificationService.generateResetToken(request.getEmail());
+        return ResponseEntity.ok("Password reset email sent");
+    }
+
 }

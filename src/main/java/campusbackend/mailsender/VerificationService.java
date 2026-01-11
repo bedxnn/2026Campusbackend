@@ -75,10 +75,11 @@ public class VerificationService {
         resetToken.setUser(user);
         resetToken.setExpiryDate(LocalDateTime.now().plusHours(1));
         verificationRepository.save(resetToken);
+        emailService.sendEmail(email,token);
         return token;
     }
     public void resetPassword(String token,String newPassword){
-        Verification verification = verificationRepository.findByToken(token).orElseThrow();
+        Verification verification = verificationRepository.findByToken(token).orElseThrow(() -> new RuntimeException("Invalid or expired token"));
         if( verification.isExpired()){
             throw new RuntimeException("Token is expired");
 
@@ -88,7 +89,7 @@ public class VerificationService {
         String hashedPassword = passwordEncoder.encode(newPassword);
         user.setPassword(hashedPassword);
          userServiceRepository.save(user);
-
+        verificationRepository.delete(verification);
     }
 
 }
