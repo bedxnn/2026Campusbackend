@@ -29,7 +29,7 @@ public class VerificationController {
         return ResponseEntity.ok("code sent");
     }
     @PostMapping("/verify-code")
-    public ResponseEntity<?> verifyCode(@RequestParam String email, @RequestParam String code){
+    public ResponseEntity<?> verifyCode(@RequestBody String email, @RequestBody String code){
         try{
             verificationService.verifyCode(email, code);
             return ResponseEntity.ok("account verified");
