@@ -1,5 +1,6 @@
 package campusbackend.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,8 +10,11 @@ public class Users {
     private Long id;
 
     private String email;
+
+    @JsonIgnore
     private String password;
 
+    @JsonIgnore
     private boolean enabled = false;
 
 

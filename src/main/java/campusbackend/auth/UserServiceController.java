@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 public class UserServiceController {
     private final UsersService usersService;
@@ -23,8 +25,10 @@ public class UserServiceController {
 
     }
     @PostMapping("/Login")
-    public ResponseEntity<String> Login(@RequestBody LoginDto dto){
-        usersService.login(dto.getEmail(), dto.getPassword());
-        return ResponseEntity.status(HttpStatus.OK).body("logged in");
+    public ResponseEntity<?> Login(@RequestBody LoginDto dto){
+        String token = usersService.login(dto.getEmail(), dto.getPassword());
+         return ResponseEntity.ok(Map.of(
+                "token", token
+        ));
     }
 }

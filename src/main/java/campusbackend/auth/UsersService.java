@@ -1,6 +1,7 @@
 package campusbackend.auth;
 
 import campusbackend.mailsender.VerificationService;
+import campusbackend.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,11 +11,13 @@ public class UsersService {
     private final UserServiceRepository userServiceRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationService verificationService;
+    private final JwtService jwtService;
 
-    public UsersService(UserServiceRepository userServiceRepository,PasswordEncoder passwordEncoder,VerificationService verificationService){
+    public UsersService(UserServiceRepository userServiceRepository,PasswordEncoder passwordEncoder,VerificationService verificationService,JwtService jwtService){
         this.userServiceRepository=userServiceRepository;
         this.passwordEncoder=passwordEncoder;
         this.verificationService=verificationService;
+        this.jwtService=jwtService;
     }
 @Transactional
     public void signup(String email,String password){
@@ -35,19 +38,22 @@ public class UsersService {
     userServiceRepository.save(user);
         verificationService.sendCode(email);
     }
+    public String login(String email, String password) {
+        Users user = userServiceRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("email don't exist"));
 
-    public void login(String email,String password){
-        Users user = userServiceRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("email don't exist"));
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("wrong password");
+        }
 
-        if(!passwordEncoder.matches(password, user.getPassword())){
-         throw new RuntimeException("wrong password");
-}
-        if(!user.isEnabled()){
-        throw new RuntimeException("Verify your account");
+        if (!user.isEnabled()) {
+            throw new RuntimeException("Verify your account");
+        }
+
+        return jwtService.generateToken(user.getEmail());
     }
-
 
         }
-    }
+
 
 
