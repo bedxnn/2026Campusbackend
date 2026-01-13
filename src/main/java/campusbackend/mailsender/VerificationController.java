@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class VerificationController {
@@ -40,9 +38,9 @@ public class VerificationController {
     }
 
     @PostMapping("/resend-code")
-    public ResponseEntity<?> resendCode(@RequestParam String email) {
+    public ResponseEntity<?> resendCode(@RequestBody ForgotPasswordRequest request) {
         try {
-            verificationService.resendCode(email);
+            verificationService.resendCode(request.getEmail());
             return ResponseEntity.ok("Verification code resent");
         } catch (RuntimeException e) {
             if (e.getMessage().contains("Too many")) {
@@ -57,7 +55,7 @@ public class VerificationController {
     }
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest){
-        verificationService.resetPassword(resetPasswordRequest.getNewPassword(),resetPasswordRequest.getToken());
+        verificationService.resetPassword(resetPasswordRequest.getToken(),resetPasswordRequest.getNewPassword());
         return  ResponseEntity.ok("Password reset succesfully");
     }
     @PostMapping("/forgot-password")
@@ -66,7 +64,6 @@ public class VerificationController {
         if (!rateLimitService.allowRequest(request.getEmail())) {
             return ResponseEntity.status(429).body("Too many requests. Try again later.");
         }
-        String token = verificationService.generateResetToken(request.getEmail());
         verificationService.generateResetToken(request.getEmail());
         return ResponseEntity.ok("Password reset email sent");
     }
