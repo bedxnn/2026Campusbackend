@@ -16,8 +16,22 @@ public class RateLimitService {
         Bucket bucket = buckets.computeIfAbsent(key, k -> createBucket());
         return bucket.tryConsume(1);
     }
+
+    public boolean allowRequest(String key, int maxRequests, Duration duration){
+        String bucketKey = key + "_" + maxRequests + "_" + duration.toMinutes();
+        Bucket bucket = buckets.computeIfAbsent(bucketKey, k -> createBucket(maxRequests, duration));
+        return bucket.tryConsume(1);
+    }
+
     private Bucket createBucket(){
         Bandwidth limit = Bandwidth.simple(3, Duration.ofMinutes(10));
+        return Bucket.builder()
+                .addLimit(limit)
+                .build();
+    }
+
+    private Bucket createBucket(int maxRequests, Duration duration){
+        Bandwidth limit = Bandwidth.simple(maxRequests, duration);
         return Bucket.builder()
                 .addLimit(limit)
                 .build();
