@@ -41,6 +41,23 @@ public class VerificationController {
         }
 
     }
+
+    @PostMapping("/resend-code")
+    public ResponseEntity<?> resendCode(@RequestParam String email) {
+        try {
+            verificationService.resendCode(email);
+            return ResponseEntity.ok("Verification code resent");
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Too many")) {
+                return ResponseEntity
+                        .status(HttpStatus.TOO_MANY_REQUESTS)
+                        .body(e.getMessage());
+            }
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        }
+    }
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest){
         verificationService.resetPassword(resetPasswordRequest.getNewPassword(),resetPasswordRequest.getToken());

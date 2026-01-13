@@ -92,4 +92,26 @@ public class VerificationService {
         verificationRepository.delete(verification);
     }
 
+    public void resendCode(String email) {
+        // Check rate limit: max 5 resends in 25 minutes
+        Instant since = Instant.now().minus(25, ChronoUnit.MINUTES);
+        long recentSends = repo.countByEmailAndExpiresAtAfter(email, since);
+
+        if (recentSends >= 5) {
+            throw new RuntimeException("Too many verification code requests. Please try again in 25 minutes.");
+        }
+
+        // Generate and send new code
+        String code = String.format("%06d", random.nextInt(1_000_000));
+
+        EmailVerification v = new EmailVerification();
+        v.setEmail(email);
+        v.setCode(code);
+        v.setExpiresAt(Instant.now().plus(10, ChronoUnit.MINUTES));
+        v.setUsed(false);
+        repo.save(v);
+
+        emailService.sendEmail(email, code);
+    }
+
 }
