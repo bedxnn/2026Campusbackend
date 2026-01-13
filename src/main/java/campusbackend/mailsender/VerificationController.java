@@ -2,6 +2,7 @@ package campusbackend.mailsender;
 
 import campusbackend.dto.ForgotPasswordRequest;
 import campusbackend.dto.ResetPasswordRequest;
+import campusbackend.dto.VerificationRequest;
 import campusbackend.ratelimit.RateLimitService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +24,11 @@ public class VerificationController {
         this.rateLimitService=rateLimitService;
     }
 
-    @PostMapping("/send-code")
-    public ResponseEntity<?> sendCode (@RequestParam String email){
-        verificationService.sendCode(email);
-        return ResponseEntity.ok("code sent");
-    }
+
     @PostMapping("/verify-code")
-    public ResponseEntity<?> verifyCode(@RequestBody String email, @RequestBody String code){
+    public ResponseEntity<?> verifyCode(@RequestBody VerificationRequest request){
         try{
-            verificationService.verifyCode(email, code);
+            verificationService.verifyCode(request.getEmail(), request.getCode());
             return ResponseEntity.ok("account verified");
         } catch (Exception e) {
             return ResponseEntity
