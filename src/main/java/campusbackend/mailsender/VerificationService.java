@@ -28,6 +28,9 @@ public class VerificationService {
         this.verificationRepository=verificationRepository;
     }
     public void sendCode(String email){
+        // Delete old unused verification codes to avoid unique constraint violation
+        repo.deleteByEmailAndUsed(email, false);
+
         String code = String.format("%06d", random.nextInt(1_000_000));
 
         EmailVerification v = new EmailVerification();
@@ -100,6 +103,9 @@ public class VerificationService {
         if (recentSends >= 5) {
             throw new RuntimeException("Too many verification code requests. Please try again in 25 minutes.");
         }
+
+        // Delete old unused verification codes to avoid unique constraint violation
+        repo.deleteByEmailAndUsed(email, false);
 
         // Generate and send new code
         String code = String.format("%06d", random.nextInt(1_000_000));
