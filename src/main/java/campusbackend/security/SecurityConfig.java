@@ -20,10 +20,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ADD THIS LINE
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/Signup", "/Login", "/send-code", "/verify-code", "/resend-code", "/reset-password", "/forgot-password").permitAll()
+                        .requestMatchers("/ws/**").permitAll()  // ADD THIS - Allow WebSocket connections
+                        .requestMatchers("/api/messages/**").authenticated()  // ADD THIS - Require auth for messages
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
