@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -22,6 +23,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     public JwtAuthFilter(JwtService jwtService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+    }
+
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/Login") ||
+                path.equals("/Signup") ||
+                path.equals("/send-code") ||
+                path.equals("/verify-code") ||
+                path.equals("/resend-code") ||
+                path.equals("/reset-password") ||
+                path.equals("/forgot-password");
     }
 
     @Override
@@ -40,9 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String email = jwtService.extractEmail(token);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
 
             if (jwtService.isTokenValid(token)) {
                 UsernamePasswordAuthenticationToken auth =

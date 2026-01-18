@@ -12,8 +12,7 @@ public interface ItemsRepository extends JpaRepository<Items,Long> {
 
     List<Items> findAllByOrderByCreatedAtDesc();
 
-    List<Items> findByStudentNameIgnoreCaseOrIdNumberIgnoreCase(String studentName, String studentId);
-
+    List<Items> findByStudentNameContainingIgnoreCaseOrIdNumberContainingIgnoreCase(String studentName, String studentId);
     // Search by ID number
     List<Items> findByIdNumberContainingIgnoreCase(String idNumber);
 }

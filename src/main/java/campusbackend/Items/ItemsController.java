@@ -55,6 +55,15 @@ public class ItemsController {
         List<Items> items = itemsService.viewPosts();
         return ResponseEntity.ok(items);
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<Items>> search(
+            @RequestParam String studentName,
+            @RequestParam String studentId) {
+
+        List<Items> results = itemsService.searchItems(studentName, studentId);
+        return ResponseEntity.ok(results);
+    }
+
 
 
 

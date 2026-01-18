@@ -2,6 +2,9 @@ package campusbackend.mailsender;
 
 import campusbackend.auth.UserServiceRepository;
 import campusbackend.auth.Users;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +72,8 @@ public class VerificationService {
         return true;
     }
     public String generateResetToken(String email){
-        Users user = userServiceRepository.findByEmail(email).orElseThrow(()-> new RuntimeException("user not found"));
+        Users user = userServiceRepository.findByEmail(email)
+                .orElseThrow(()-> new RuntimeException("user not found"));
 
         String token = UUID.randomUUID().toString();
 
@@ -78,7 +82,16 @@ public class VerificationService {
         resetToken.setUser(user);
         resetToken.setExpiryDate(LocalDateTime.now().plusHours(1));
         verificationRepository.save(resetToken);
-        emailService.sendEmail(email,token);
+
+
+        String resetLink = "http://localhost:5173/reset-password?token=" + token + "&email=" + email;
+        String message = "Click the link below to reset your password:\n\n" +
+                resetLink +
+                "\n\nThis link will expire in 1 hour.\n\n" +
+                "If you didn't request this, please ignore this email.";
+
+        emailService.sendPasswordRequestToken(email, message);
+
         return token;
     }
     public void resetPassword(String token,String newPassword){

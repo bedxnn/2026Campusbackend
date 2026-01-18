@@ -37,6 +37,16 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    public void sendPasswordRequestToken(String to,String message){
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(to);
+        mailMessage.setSubject("Password reset request");
+        mailMessage.setText(message);
+        mailMessage.setFrom(fromEmail);
+
+        mailSender.send(mailMessage);
+    }
+
 
     public void forgotPassword(String to, String resetToken ){
         SimpleMailMessage message = new SimpleMailMessage();

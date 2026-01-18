@@ -1,7 +1,7 @@
 package campusbackend.Items;
 
 import campusbackend.auth.Users;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -13,7 +13,7 @@ public class Items {
     private Long id;
 
     @ManyToOne
-    @JsonIgnore
+    @JoinColumn(name = "user_id")
     private Users user;
 
     private String idNumber;
@@ -26,8 +26,19 @@ public class Items {
         this.user=user;
         this.createdAt=LocalDateTime.now();
     }
-    public Items(){
 
+    public Items(){
+    }
+
+    // ADD THIS - Send only user email to frontend
+    @JsonProperty("userEmail")
+    public String getUserEmail() {
+        return user != null ? user.getEmail() : null;
+    }
+
+    // Getters and setters
+    public Long getId() {
+        return id;
     }
 
     public String getIdNumber(){
@@ -36,7 +47,6 @@ public class Items {
 
     public void setIdNumber(String idNumber) {
         this.idNumber = idNumber;
-
     }
 
     public Users getUser() {

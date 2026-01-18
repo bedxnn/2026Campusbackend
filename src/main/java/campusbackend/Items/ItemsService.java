@@ -34,8 +34,9 @@ public class ItemsService {
     public List<Items> viewPosts(){
         return itemsRepository.findAllByOrderByCreatedAtDesc();
     }
-    public List<Items> searchItem(String studentName,String studentId){
-        return itemsRepository.findByStudentNameIgnoreCaseOrIdNumberIgnoreCase(studentName,studentId);
+
+    public List<Items> searchItems(String studentName,String studentId){
+        return itemsRepository.findByStudentNameContainingIgnoreCaseOrIdNumberContainingIgnoreCase(studentName, studentId);
 
     }
 }
