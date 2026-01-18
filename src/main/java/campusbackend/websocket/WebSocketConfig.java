@@ -2,6 +2,7 @@ package campusbackend.websocket;
 
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -11,6 +12,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    @Value("${cors.allowed.origin:http://localhost:5173}")
+    private String allowedOrigin;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -27,12 +31,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Register the /ws endpoint for WebSocket connections
+        // SECURITY: Only allow specific origins to prevent CSRF attacks
+        // Configure via 'cors.allowed.origin' property (defaults to localhost:5173)
+        // For production, set this to your actual frontend domain
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*") // For development - restrict in production
+                .setAllowedOrigins(allowedOrigin)
                 .withSockJS(); // Enable SockJS fallback options
 
         // Also register without SockJS for native WebSocket connections
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*");
+                .setAllowedOrigins(allowedOrigin);
     }
 }
