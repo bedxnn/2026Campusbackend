@@ -1,13 +1,10 @@
-package campusbackend.dto;
-
+package campusbackend.websocket;
 
 
 import campusbackend.auth.UserServiceRepository;
 import campusbackend.auth.Users;
 import campusbackend.Items.AuthService;
 import campusbackend.dto.SendMessageRequest;
-import campusbackend.websocket.Messages;
-import campusbackend.websocket.MessagesService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -62,7 +59,6 @@ public class MessageWebSocketController {
                     message
             );
         } catch (Exception e) {
-            // Handle error - you might want to send error message back to client
             System.err.println("Error sending message: " + e.getMessage());
         }
     }
@@ -79,7 +75,6 @@ public class MessageWebSocketController {
 
         List<Messages> conversation = messagesService.getConversation(currentUser, otherUser);
 
-        // Mark messages as read
         messagesService.markConversationAsRead(currentUser, otherUser);
 
         return ResponseEntity.ok(conversation);

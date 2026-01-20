@@ -15,7 +15,9 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
-    private static final long EXPIRATION = 1000 * 60 * 60;
+    // Two different expiration times
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 15; // 15 minutes
+    private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7; // 7 days
 
     private Key key;
 
@@ -24,17 +26,29 @@ public class JwtService {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String email) {
+    // Generate Access Token (short-lived)
+    public String generateAccessToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("type", "access")  // Mark as access token
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(key)
                 .compact();
-
     }
 
-    public String extractEmail (String token) {
+
+    public String generateRefreshToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("type", "refresh")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+                .signWith(key)
+                .compact();
+    }
+
+    public String extractEmail(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -59,5 +73,18 @@ public class JwtService {
         }
     }
 
+    // Check if it's a refresh token
+    public boolean isRefreshToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
+            return "refresh".equals(claims.get("type"));
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
