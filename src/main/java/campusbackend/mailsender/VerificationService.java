@@ -31,19 +31,7 @@ public class VerificationService {
         this.verificationRepository=verificationRepository;
     }
     public void sendCode(String email){
-
-        repo.deleteByEmailAndUsed(email, false);
-
-        String code = String.format("%06d", random.nextInt(1_000_000));
-
-        EmailVerification v = new EmailVerification();
-        v.setEmail(email);
-        v.setCode(code);
-        v.setExpiresAt(Instant.now().plus(10, ChronoUnit.MINUTES));
-        v.setUsed(false);
-        repo.save(v);
-
-        emailService.sendEmail(email,code);//ver code sewnd
+        generateAndSendVerificationCode(email);
     }
     public boolean verifyCode(String email,String code){
         EmailVerification v = repo.findTopByEmailOrderByIdDesc(email).orElseThrow(() -> new RuntimeException("no code sent"));
@@ -109,15 +97,28 @@ public class VerificationService {
     }
 
     public void resendCode(String email) {
+        validateRateLimitForResend(email);
+        generateAndSendVerificationCode(email);
+    }
 
+    /**
+     * Validates that the user hasn't exceeded the rate limit for resending verification codes.
+     * Allows maximum 5 requests per 25 minutes.
+     */
+    private void validateRateLimitForResend(String email) {
         Instant since = Instant.now().minus(25, ChronoUnit.MINUTES);
         long recentSends = repo.countByEmailAndExpiresAtAfter(email, since);
 
         if (recentSends >= 5) {
             throw new RuntimeException("Too many verification code requests. Please try again in 25 minutes.");
         }
+    }
 
-
+    /**
+     * Generates a new 6-digit verification code and sends it via email.
+     * Deletes any existing unused codes before creating a new one.
+     */
+    private void generateAndSendVerificationCode(String email) {
         repo.deleteByEmailAndUsed(email, false);
 
         String code = String.format("%06d", random.nextInt(1_000_000));
