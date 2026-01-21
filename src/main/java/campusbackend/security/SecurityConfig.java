@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/Signup", "/Login", "/send-code", "/verify-code", "/resend-code", "/reset-password", "/forgot-password").permitAll()
+                        .requestMatchers("/Signup", "/Login", "/send-code", "/verify-code", "/resend-code", "/reset-password", "/forgot-password","/refresh").permitAll()
                         .requestMatchers("/ws/**").permitAll()  // ADD THIS - Allow WebSocket connections
                         .requestMatchers("/api/messages/**").authenticated()  // ADD THIS - Require auth for messages
                         .anyRequest().authenticated()

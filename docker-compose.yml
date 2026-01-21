@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: campus-database
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: campus_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/campus-database
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

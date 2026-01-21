@@ -48,7 +48,7 @@ public class UsersService {
             throw new RuntimeException("Verify your account");
         }
 
-        return jwtService.generateToken(user.getEmail());
+        return jwtService.generateAccessToken(user.getEmail());
     }
 
         }

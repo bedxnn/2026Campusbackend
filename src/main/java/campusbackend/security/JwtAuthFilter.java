@@ -35,7 +35,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 path.equals("/verify-code") ||
                 path.equals("/resend-code") ||
                 path.equals("/reset-password") ||
+                path.equals("/refresh") ||
                 path.equals("/forgot-password");
+
     }
 
     @Override
@@ -51,22 +53,34 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = header.substring(7);
-        String email = jwtService.extractEmail(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        // ADD THIS CHECK - token might be empty!
+        if (token.trim().isEmpty()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            if (jwtService.isTokenValid(token)) {
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+        try {  // WRAP IN TRY-CATCH
+            String email = jwtService.extractEmail(token);
 
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                if (jwtService.isTokenValid(token)) {
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
+        } catch (Exception e) {
+            // Invalid token, just log and continue
+            System.out.println("JWT validation failed: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);
