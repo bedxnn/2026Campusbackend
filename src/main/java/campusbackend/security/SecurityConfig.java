@@ -43,15 +43,17 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:5173");
-        config.addAllowedOrigin("https://campus-frontend-nine.vercel.app");
-        config.addAllowedOrigin("https://campus-frontend-36crjocxv-bedxnns-projects.vercel.app");
+        // Allow localhost for development
+        config.addAllowedOriginPattern("http://localhost:*");
+        // Allow all Vercel deployments
+        config.addAllowedOriginPattern("https://*.vercel.app");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
