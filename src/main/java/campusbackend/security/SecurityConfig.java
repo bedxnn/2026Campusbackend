@@ -24,8 +24,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/Signup", "/Login", "/send-code", "/verify-code", "/resend-code", "/reset-password", "/forgot-password","/refresh").permitAll()
-                        .requestMatchers("/ws/**").permitAll()  // ADD THIS - Allow WebSocket connections
-                        .requestMatchers("/api/messages/**").authenticated()  // ADD THIS - Require auth for messages
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/messages/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -44,6 +44,8 @@ public class SecurityConfig {
 
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("https://campus-frontend-nine.vercel.app");
+        config.addAllowedOrigin("https://campus-frontend-36crjocxv-bedxnns-projects.vercel.app");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
