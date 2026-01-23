@@ -24,7 +24,8 @@ public class RateLimitService {
     }
 
     private Bucket createBucket(){
-        Bandwidth limit = Bandwidth.simple(3, Duration.ofMinutes(10));
+        Bandwidth limit = Bandwidth.simple(20, Duration.ofMinutes(10));
+
         return Bucket.builder()
                 .addLimit(limit)
                 .build();
